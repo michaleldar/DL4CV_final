@@ -78,7 +78,10 @@ class Dataset:
                            index_col=0)
         nafl2 = pd.read_csv("/net/mraid20/export/genie/LabData/Data/10K/for_review/follow_up_conditions_all.csv",
                             index_col=0)
+        print (nafl.columns)
+
         nafl = pd.concat([nafl, nafl2])[["medical_condition"]]
+        print (nafl.columns)
         df = pd.merge(df, nafl, left_index=True, right_index=True)
 
         # print number of rows in df
