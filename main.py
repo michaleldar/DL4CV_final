@@ -4,8 +4,9 @@ import torch
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import cv_preprocess as cvp
+import dataset_preprocess as dp
 
 
 if __name__ == '__main__':
-    dataset = cvp.create_dataset(run_map_images=True)
+    dataset = dp.Dataset().create_dataset(run_map_images=True)
     dataset.to_csv('us_dataset_10_3_24.csv')
