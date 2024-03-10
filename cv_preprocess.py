@@ -85,6 +85,9 @@ def create_dataset(run_map_images=False):
     subject_data['Date'] = subject_data['Date'].dt.date  # Date without the time
     measures_data['Date'] = measures_data['Date'].dt.date  # Date without the time)
     ultrasounds_data['Date'] = ultrasounds_data['Date'].dt.date  # Date without the time
+    nafl = pd.read_csv("/net/mraid20/export/genie/LabData/Data/10K/for_review/baseline_conditions_all.csv", index_col=0)
+    nafl2 = pd.read_csv("/net/mraid20/export/genie/LabData/Data/10K/for_review/follow_up_conditions_all.csv", index_col=0)
+    nafl = pd.concat([nafl, nafl2])[["medical_condition"]]
 
     # uniq duplicates by the index, keep the one with the row with the most recent date ("Date" column):
     subject_data = keep_first_date(subject_data[~subject_data.index.duplicated(keep='first')])
@@ -93,6 +96,7 @@ def create_dataset(run_map_images=False):
     # merge the dataframes
     df = pd.merge(subject_data, measures_data, left_index=True, right_index=True)
     df = pd.merge(df, ultrasounds_data, left_index=True, right_index=True)
+    df = pd.merge(df, nafl, left_index=True, right_index=True)
 
     if run_map_images:
         map_subject_to_images()
