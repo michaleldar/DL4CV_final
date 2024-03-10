@@ -75,14 +75,21 @@ class Dataset:
         df = pd.merge(subject_data, measures_data, left_index=True, right_index=True)
         df = pd.merge(df, ultrasounds_data, left_index=True, right_index=True)
 
+        # print number of rows in df
+        print('Number of rows in df:', df.shape[0])
         if run_map_images:
             self.map_subject_to_images()
         images = np.load('/home/michalel/PycharmProjects/basic/map_sbj_to_img.npy', allow_pickle='TRUE').item()
         images = pd.DataFrame.from_dict(images, orient='index')
         images = images.rename(columns={0: 'image_path'})
+        # print the index of images, and index of df
+        print('Index of images:', images.index[:5])
+        print('Index of df:', df.index[:5])
         df = df.merge(images, left_index=True, right_index=True)
+        print('Number of rows in df:', df.shape[0])
         df['liver_attenuation'] = df.filter(regex='att_plus_ssp_plus_db_cm_mhz').mean(axis=1)
         df['liver_sound_speed'] = df.filter(regex='att_plus_ssp_plus_m_s').mean(axis=1)
+        print('Number of rows in df:', df.shape[0])
 
         return df
 

@@ -81,7 +81,7 @@ def evaluate(model, val_loader, criterion):
             y_true.extend(labels.tolist())
     return val_loss / len(val_loader.dataset), predictions, y_true
 
-def main():
+def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'):
     label_to_predict = "medical_condition"
 
     wandb.init(project=label_to_predict)
@@ -97,7 +97,7 @@ def main():
         ])
     }
 
-    csv_path = '/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
+    csv_path = dataset_path
     data = CustomDataset(csv_file=csv_path, label_to_predict=label_to_predict, transform=data_transforms['train'])
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size

@@ -6,12 +6,11 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, Dataset, random_split
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, f1_score
 import wandb
 import matplotlib.pyplot as plt
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# PATCH_SIZE = 14
 PATCH_SIZE = 8
 
 class ApplyMaskToImage(object):
@@ -35,7 +34,6 @@ class ApplyMaskToImage(object):
 class DinoVisionTransformerClassifier(nn.Module):
     def __init__(self):
         super(DinoVisionTransformerClassifier, self).__init__()
-        # dinov2_vits14 = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14")
         dinov2_vits16 = torch.hub.load('facebookresearch/dino:main', 'dino_vits16')
         self.transformer = deepcopy(dinov2_vits16)
         self.classifier = nn.Sequential(nn.Linear(384, 256), nn.ReLU(), nn.Linear(256, 1))
@@ -149,12 +147,9 @@ data_transforms = {
         ),
     }
 
-if __name__ == '__main__':
-    # dinov2_vits14 = torch.hub.load("facebookresearch/dinov2", "dinov2_vits14")
-    # dinov2_vits16 = torch.hub.load("facebookresearch/dinov2", "dinov2_vits16")
 
+def main():
     wandb.init(project="pred_FLD_w_dino")
-
     csv_path = '/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     data = CustomDataset(csv_file=csv_path, transform=data_transforms['train'])
     train_size = int(0.8 * len(data))
@@ -162,26 +157,15 @@ if __name__ == '__main__':
     # fix the seed for reproducibility
     generator1 = torch.Generator().manual_seed(42)
     train_dataset, val_dataset = random_split(data, [train_size, val_size])
-
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=0)
-
-    """# visualize the first image in the dataset, and print its shape
-    img, label = data[0]
-    print(img.shape)
-    plt.imshow(img.permute(1, 2, 0))
-    plt.show()"""
-
-
     model = DinoVisionTransformerClassifier()
     model = model.to(device)
     model = model.train()
     wandb.watch(model, log_freq=100)
-
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-6)
     num_epochs = 15
-
     epoch_losses = []
     for epoch in range(num_epochs):
         print("Epoch: ", epoch)
@@ -221,20 +205,15 @@ if __name__ == '__main__':
             val_loss = criterion(torch.tensor(predictions).to(device), torch.tensor(y_true).float().to(device))
         print(f"Validation loss: {val_loss.item()}")
         accuracy = np.mean(np.round(predictions) == y_true)
+        f1 = f1_score(y_true, np.round(predictions))
         roc_auc = roc_auc_score(y_true, predictions)
-        print(f"Validation accuracy: {accuracy}", f"ROC AUC: {roc_auc}")
+        print(f"Validation accuracy: {accuracy}", f"ROC AUC: {roc_auc}, F1: {f1}")
         wandb.log({"epoch_loss": epoch_losses[-1],
                    "validation_loss": val_loss.item(),
-                   "accuracy": accuracy, "roc_auc": roc_auc})
+                   "accuracy": accuracy, "roc_auc": roc_auc, "F1": f1})
+        return model
 
-    # save the trained model
-    torch.save(model.state_dict(), "/home/michalel/PycharmProjects/basic/dino_ft_FLD.pth")
-    print("Finished training!")
-    wandb.log({"scatter": wandb.plot.scatter(
-        x=np.array(y_true), y=np.array(predictions),
-        title="true (x) vs. predicted (y)",
-    )})
-    image_path = "/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1002254441/00_00_visit/20220915/092714.jpg"
-    img = Image.open(image_path).convert('RGB')
-    img = data_transforms['train'](img)
-    # visualize_self_attention(model, img)
+
+if __name__ == '__main__':
+    model = main()
+
