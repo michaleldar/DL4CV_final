@@ -2,20 +2,22 @@ import cv2
 import numpy as np
 import os
 import glob
+import pandas as pd
+from datetime import datetime
 import sys
 sys.path.extend(['/home/michalel/PycharmProjects/LabData'])
 sys.path.extend(['/home/michalel/PycharmProjects/LabQueue'])
 sys.path.extend(['/home/michalel/PycharmProjects/LabUtils'])
-from LabData.DataLoaders import SubjectLoader
 from LabData.DataLoaders import BodyMeasuresLoader
-import pandas as pd
-from datetime import datetime
+from LabData.DataLoaders import SubjectLoader
+from LabData.DataLoaders import UltrasoundLoader
 
 
 def extract_patch(image, top_left, patch_size):
     x, y = top_left
     h, w = patch_size
     return image[y:y+h, x:x+w]
+
 
 def find_images_with_patch(directory, reference_patch, patch_top_left, threshold=0.9):
     # Convert the reference patch to grayscale
@@ -45,7 +47,7 @@ def find_images_with_patch(directory, reference_patch, patch_top_left, threshold
     return matching_images
 
 
-def filter_us(search_directory='/net/mraid08/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1001201093/00_00_visit/20210826/'):
+def filter_us(search_directory='/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1001201093/00_00_visit/20210826/'):
     patch_size, patch_top_left, reference_image = us_patch_id()
     # Extract the reference patch from the reference image
     reference_patch = extract_patch(reference_image, patch_top_left, patch_size)
@@ -55,7 +57,7 @@ def filter_us(search_directory='/net/mraid08/export/genie/LabData/Data/10K/aws_l
 
 
 def us_patch_id():
-    reference_image_path = '/net/mraid08/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1001201093/00_00_visit/20210826/103932.jpg'
+    reference_image_path = '/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1001201093/00_00_visit/20210826/103932.jpg'
     # Define the top-left corner and size of the patch to extract from the reference image
     patch_top_left = (1130, 925)
     patch_size = (300, 155)
@@ -69,56 +71,56 @@ def _convert_to_date(date):
     return datetime.strptime(date, '%Y%m%d').date()
 
 
-if __name__ == "__main__":
+def keep_first_date(df):
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df.sort_values(by='Date', ascending=True)
+    df = df[~df.index.duplicated(keep='first')]
+    return df
+
+
+def create_dataset(run_map_images=False):
+    subject_data = SubjectLoader.SubjectLoader().get_data(study_ids=['10K']).df.reset_index(level=[1])
+    measures_data = BodyMeasuresLoader.BodyMeasuresLoader().get_data(study_ids=['10K']).df.reset_index(level=[1])
+    ultrasounds_data = UltrasoundLoader.UltrasoundLoader().get_data(study_ids=['10K']).df.reset_index(level=[1])
+    subject_data['Date'] = subject_data['Date'].dt.date  # Date without the time
+    measures_data['Date'] = measures_data['Date'].dt.date  # Date without the time)
+    ultrasounds_data['Date'] = ultrasounds_data['Date'].dt.date  # Date without the time
+
+    # uniq duplicates by the index, keep the one with the row with the most recent date ("Date" column):
+    subject_data = keep_first_date(subject_data[~subject_data.index.duplicated(keep='first')])
+    measures_data = keep_first_date(measures_data[~measures_data.index.duplicated(keep='first')])
+    ultrasounds_data = keep_first_date(ultrasounds_data[~ultrasounds_data.index.duplicated(keep='first')])
+    # merge the dataframes
+    df = pd.merge(subject_data, measures_data, left_index=True, right_index=True)
+    df = pd.merge(df, ultrasounds_data, left_index=True, right_index=True)
+
+    if run_map_images:
+        map_subject_to_images()
+    # load npy file with the dictionary of the images
+    images = np.load('/home/michalel/PycharmProjects/basic/us_dataset_by_id.npy', allow_pickle='TRUE').item()
+    images = pd.DataFrame.from_dict(images, orient='index')
+    # set the first column to be named "image_path"
+    images = images.rename(columns={0: 'image_path'})
+    df = df.merge(images, left_index=True, right_index=True)
+    df['liver_attenuation'] = df.filter(regex='att_plus_ssp_plus_db_cm_mhz').mean(axis=1)
+    df['liver_sound_speed'] = df.filter(regex='att_plus_ssp_plus_m_s').mean(axis=1)
+
+    return df
+
+
+def map_subject_to_images(subjects_path_rgx='/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/*/00_00_visit/*', path_to_save='us_dataset_by_id_and_date.npy'):
     dataset = {}
-    counter = 0
-    # build a dictionary of directories (/net/mraid08/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/*/00_00_visit/*/*.jpg to list of images). take only 100 directories
+    # build a dictionary of directories (/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/*/00_00_visit/*/*.jpg to list of images). take only 100 directories
     # for each directory, find the matching images
-    for directory in glob.glob('/net/mraid08/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/*/00_00_visit/*'):
-        # counter += 1
-        # print(directory)
+    for directory in glob.glob(subjects_path_rgx):
         matching_images = filter_us(directory)
-        # print(matching_images)
         # the key is the name of the directory under "jpg" folder
         key = "10K_" + directory.split('jpg/')[-1].split('/')[0]
         date = _convert_to_date(directory.split('jpg/')[-1].split('/')[2])
         dataset[(key, date)] = matching_images
-    print(dataset)
     # save the dictionary to a file
-    np.save('us_dataset_by_id_and_date.npy', dataset)
-    # load the dictionary from a file:
-    # dataset = np.load('us_dataset_by_id.npy', allow_pickle='TRUE').item()
-    subject_data = SubjectLoader.SubjectLoader().get_data(study_ids=['10K']).df.reset_index(level=[1])
-    measures_data = BodyMeasuresLoader.BodyMeasuresLoader().get_data(study_ids=['10K']).df.reset_index(level=[1])
-    # change the dates in the "Date" column to contain only the date without the time
-    subject_data['Date'] = subject_data['Date'].dt.date
-    measures_data['Date'] = measures_data['Date'].dt.date
-
-    # convert dataset to pandas dataframe, where the keys are the indexes and the values in a different column
-    df = pd.DataFrame.from_dict(dataset, orient='index')
-
-    # set the index tuple of df as a named list indexes
-    df.index = pd.MultiIndex.from_tuples(df.index, names=['RegistrationCode', 'Date'])
-    # reset the Date index to be a column, and not a MultiIndex
-    df = df.reset_index(level=[1])
-    # rename the column "index" to "image_path"
-
-    # set the Date in the MultiIndex to be only date without time, and make them unique
-    subject_data.index = subject_data.index.set_levels(subject_data.index.levels[1].date, level=1)
-
-    df = df.merge(subject_data, left_index=True, right_index=True)
-    df = df.merge(measures_data, left_index=True, right_index=True)
-    # save the dataframe to a file
-    df.to_csv('us_dataset.csv')
+    np.save(path_to_save, dataset)
 
 
-
-df['Date'] = pd.to_datetime(df.index.get_level_values('Date'))
-subject_data['Date'] = pd.to_datetime(subject_data.index.get_level_values('Date'))
-measures_data['Date'] = pd.to_datetime(measures_data.index.get_level_values('Date'))
-
-
-# Merge dataframes on ID and Date
-merged_df = pd.merge(df1, df2, left_on=['ID', 'Date'], right_on=['ID', 'Date'])
-
-
+if __name__ == "__main__":
+    pass
