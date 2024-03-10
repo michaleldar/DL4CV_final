@@ -102,7 +102,7 @@ class Dataset:
             matching_images = self.filter_us(directory)
             key = "10K_" + directory.split('jpg/')[-1].split('/')[0]
             date = self._convert_to_date(directory.split('jpg/')[-1].split('/')[2])
-            dataset[(key, date)] = matching_images
+            dataset[key] = matching_images
             if count % 100 == 0:
                 print(f'{count} subjects processed')
         np.save(path_to_save, dataset)
