@@ -148,10 +148,9 @@ data_transforms = {
     }
 
 
-def main():
+def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'):
     wandb.init(project="pred_FLD_w_dino")
-    csv_path = '/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
-    data = CustomDataset(csv_file=csv_path, transform=data_transforms['train'])
+    data = CustomDataset(csv_file=dataset_path, transform=data_transforms['train'])
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size
     # fix the seed for reproducibility
