@@ -90,7 +90,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     # Data preparation
     data_transforms = {
         'train': transforms.Compose([
-            ApplyMaskToImage('/path/to/mask.jpg'),
+            ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
             transforms.CenterCrop((720, 1000)),
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
