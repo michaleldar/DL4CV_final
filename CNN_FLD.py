@@ -108,11 +108,11 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
     # Model preparation
     model = models.resnet50(pretrained=True)
-    print(model.fc.in_features)
+    # print(model.fc.in_features)
     # remove the last layer
-    model = nn.Sequential(*list(model.children())[:-1])
+    # model = nn.Sequential(*list(model.children())[:-1])
     # print the width of the last layer
-    print(model.fc.in_features)
+    # print(model.fc.in_features)
     model.fc = nn.Sequential(
         nn.Linear(model.fc.in_features, 512),
         nn.ReLU(),
