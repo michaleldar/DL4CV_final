@@ -139,6 +139,18 @@ data_transforms = {
                 transforms.CenterCrop((720, 1000)),
                 # transforms.Resize((224, 224)),
                 transforms.Resize((480, 480)),
+                transforms.RandomRotation(360),
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                transforms.ToTensor()
+            ]
+        ),
+        "validation": transforms.Compose(
+            [
+                ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
+                transforms.CenterCrop((720, 1000)),
+                # transforms.Resize((224, 224)),
+                transforms.Resize((480, 480)),
                 # transforms.RandomRotation(360),
                 # transforms.RandomHorizontalFlip(),
                 # transforms.RandomVerticalFlip(),
@@ -155,7 +167,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     val_size = len(data) - train_size
     # fix the seed for reproducibility
     generator1 = torch.Generator().manual_seed(42)
-    train_dataset, val_dataset = random_split(data, [train_size, val_size])
+    train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=generator1)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=0)
     model = DinoVisionTransformerClassifier()

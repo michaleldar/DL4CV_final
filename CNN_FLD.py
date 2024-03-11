@@ -105,8 +105,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     val_size = len(data) - train_size
     train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=torch.Generator().manual_seed(42))
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, collate_fn=custom_collate)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, collate_fn=custom_collate)
+    train_loader = DataLoader(train_dataset, batch_size=wandb.config.batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=False)
 
     # Model preparation
     model = models.resnet50(pretrained=True)
@@ -124,12 +124,12 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         nn.Sigmoid()
     )
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=wandb.config.lr)
 
     # Training
     model.to(DEVICE)
     wandb.watch(model, log_freq=100)
-    for epoch in range(15):
+    for epoch in wandb.config.epochs:
         train_loss = train(model, train_loader, optimizer, criterion)
         val_loss, predictions, y_true = evaluate(model, val_loader, criterion)
         accuracy = metrics.roc_auc_score(y_true, predictions)
