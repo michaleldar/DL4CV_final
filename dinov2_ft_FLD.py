@@ -46,13 +46,9 @@ class DinoVisionTransformerClassifier(nn.Module):
 
 
 class CustomDataset(Dataset):
-    def __init__(self, csv_file, transform=None, image_path_column="image_path"):
+    def __init__(self, df, transform=None, image_path_column="image_path"):
         self._image_path_column = image_path_column
-        self.df = pd.read_csv(csv_file)
-        self.df = self.df.drop_duplicates(subset=[self._image_path_column])
-        # convert the medical condition to 0/1
-        self.df["medical_condition"] = self.df["medical_condition"].apply(lambda x: 0 if x == "DB92" else 1)
-        self.df = self.df.dropna(subset=["medical_condition", self._image_path_column], how='any')
+        self.df = df
         self.transform = transform
 
     def __len__(self):
@@ -162,14 +158,21 @@ data_transforms = {
 
 def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'):
     wandb.init(project="DINOv2_FLD")
-    data = CustomDataset(csv_file=dataset_path, transform=data_transforms['train'])
-    train_size = int(0.8 * len(data))
+    image_path_column="image_path"
+    df = pd.read_csv(dataset_path)
+    df = df.drop_duplicates(subset=[image_path_column])
+    # convert the medical condition to 0/1
+    df["medical_condition"] = df["medical_condition"].apply(lambda x: 0 if x == "DB92" else 1)
+    df = df.dropna(subset=["medical_condition", image_path_column], how='any')
+    train_size = int(0.8 * len(df))
     val_size = len(data) - train_size
     # fix the seed for reproducibility
     generator1 = torch.Generator().manual_seed(42)
-    train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=generator1)
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=0)
+    train_split, val_split = random_split(data, [train_size, val_size], generator=generator1)
+    train_data = CustomDataset(csv_file=train_split, transform=data_transforms['train'], image_path_column=image_path_column)
+    val_data = CustomDataset(csv_file=val_split, transform=data_transforms['validation'], image_path_column=image_path_column)
+    train_loader = DataLoader(train_data, batch_size=32, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_data, batch_size=32, shuffle=False, num_workers=0)
     model = DinoVisionTransformerClassifier()
     model = model.to(device)
     model = model.train()

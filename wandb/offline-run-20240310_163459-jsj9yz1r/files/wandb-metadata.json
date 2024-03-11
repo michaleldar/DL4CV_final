@@ -1,0 +1,80 @@
+{
+    "os": "Linux-3.10.0-957.21.2.el7.x86_64-x86_64-with-glibc2.17",
+    "python": "3.11.7",
+    "heartbeatAt": "2024-03-10T14:34:59.225476",
+    "startedAt": "2024-03-10T14:34:59.137861",
+    "docker": null,
+    "cuda": "10.1.243",
+    "args": [],
+    "state": "running",
+    "program": "/home/tomerse/PycharmProjects/DL4CV_final/CNN_FLD.py",
+    "codePathLocal": "CNN_FLD.py",
+    "codePath": "CNN_FLD.py",
+    "git": {
+        "remote": "https://github.com/michaleldar/DL4CV_final.git",
+        "commit": "0daee4bb497fa917106487d216be0333b64593c8"
+    },
+    "email": null,
+    "root": "/home/tomerse/PycharmProjects/DL4CV_final",
+    "host": "mcluster11",
+    "username": "tomerse",
+    "executable": "/home/tomerse/anaconda3/bin/.conda/bin/python",
+    "cpu_count": 8,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2095.078,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2095.078,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 147.5209503173828,
+            "used": 24.78274917602539
+        }
+    },
+    "memory": {
+        "total": 62.90238571166992
+    }
+}
