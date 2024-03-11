@@ -129,7 +129,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     # Training
     model.to(DEVICE)
     wandb.watch(model, log_freq=100)
-    for epoch in wandb.config.epochs:
+    for epoch in range(wandb.config.epochs):
         train_loss = train(model, train_loader, optimizer, criterion)
         val_loss, predictions, y_true = evaluate(model, val_loader, criterion)
         accuracy = metrics.roc_auc_score(y_true, predictions)
