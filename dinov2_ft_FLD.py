@@ -165,10 +165,10 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     df["medical_condition"] = df["medical_condition"].apply(lambda x: 0 if x == "DB92" else 1)
     df = df.dropna(subset=["medical_condition", image_path_column], how='any')
     train_size = int(0.8 * len(df))
-    val_size = len(data) - train_size
+    val_size = len(df) - train_size
     # fix the seed for reproducibility
     generator1 = torch.Generator().manual_seed(42)
-    train_split, val_split = random_split(data, [train_size, val_size], generator=generator1)
+    train_split, val_split = random_split(df, [train_size, val_size], generator=generator1)
     train_data = CustomDataset(csv_file=train_split, transform=data_transforms['train'], image_path_column=image_path_column)
     val_data = CustomDataset(csv_file=val_split, transform=data_transforms['validation'], image_path_column=image_path_column)
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True, num_workers=0)
