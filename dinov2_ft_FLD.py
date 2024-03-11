@@ -171,7 +171,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     generator1 = torch.Generator().manual_seed(42)
     train_split, val_split = random_split(df, [train_size, val_size], generator=generator1)
 
-    print(type(train_split))
+    train_split = train_split.dataset.iloc[train_split.indices]
+    val_split = val_split.dataset.iloc[val_split.indices]
 
     train_data = CustomDataset(train_split, transform=data_transforms['train'])
     val_data = CustomDataset(val_split, transform=data_transforms['validation'])
