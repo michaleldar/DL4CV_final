@@ -169,8 +169,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     # fix the seed for reproducibility
     generator1 = torch.Generator().manual_seed(42)
     train_split, val_split = random_split(df, [train_size, val_size], generator=generator1)
-    train_data = CustomDataset(csv_file=train_split, transform=data_transforms['train'])
-    val_data = CustomDataset(csv_file=val_split, transform=data_transforms['validation'])
+    train_data = CustomDataset(train_split, transform=data_transforms['train'])
+    val_data = CustomDataset(val_split, transform=data_transforms['validation'])
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_data, batch_size=32, shuffle=False, num_workers=0)
     model = DinoVisionTransformerClassifier()
