@@ -13,6 +13,7 @@ import wandb
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 from sklearn import metrics
+from datetime import datetime
 
 # Constants
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -83,9 +84,10 @@ def evaluate(model, val_loader, criterion):
 
 def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'):
     label_to_predict = "medical_condition"
-
-    wandb.init(project=label_to_predict)
-    wandb.run.name = "3 fc layers"
+    wandb.init(project="CNN_FLD")
+    # give the run a name of the date and time
+    run_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    wandb.run.name = run_name
 
     # Data preparation
     data_transforms = {
@@ -132,11 +134,27 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         val_loss, predictions, y_true = evaluate(model, val_loader, criterion)
         accuracy = metrics.roc_auc_score(y_true, predictions)
         # calculate F1 score
-        f1 = metrics.f1_score(y_true, [1 if p > 0.5 else 0 for p in predictions])
+        f1 = metrics.f1_score(y_true, [1 if p > 0.9 else 0 for p in predictions])
         print(f'Epoch {epoch+1}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}, F1 score: {f1:.4f}')
 
         # Log metrics
         wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "val_loss": val_loss, "accuracy": accuracy, "F1": f1})
 
+def sweep_optimization():
+
+    sweep_configuration = {
+        "method": "bayes",
+        "name": "sweep",
+        "metric": {"goal": "maximize", "name": "accuracy"},
+        "parameters": {
+            "batch_size": {"values": [32, 64, 128]},
+            "epochs": {"values": [5, 10, 15, 20]},
+            "lr": {"max": 0.001, "min": 0.000001},
+        },
+    }
+    sweep_id = wandb.sweep(sweep_configuration, project="CNN_FLD")
+    wandb.agent(sweep_id, function=main)
+
+
 if __name__ == '__main__':
-    main()
+    sweep_optimization()

@@ -149,7 +149,7 @@ data_transforms = {
 
 
 def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'):
-    wandb.init(project="pred_FLD_w_dino")
+    wandb.init(project="DINOv2_FLD")
     data = CustomDataset(csv_file=dataset_path, transform=data_transforms['train'])
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size
@@ -204,7 +204,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
             val_loss = criterion(torch.tensor(predictions).to(device), torch.tensor(y_true).float().to(device))
         print(f"Validation loss: {val_loss.item()}")
         accuracy = np.mean(np.round(predictions) == y_true)
-        f1 = f1_score(y_true, np.round(predictions))
+        f1 = f1_score(y_true, [1 if p > 0.9 else 0 for p in predictions])
         roc_auc = roc_auc_score(y_true, predictions)
         print(f"Validation accuracy: {accuracy}", f"ROC AUC: {roc_auc}, F1: {f1}")
         wandb.log({"epoch_loss": epoch_losses[-1],
