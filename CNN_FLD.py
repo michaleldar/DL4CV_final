@@ -152,8 +152,9 @@ def sweep_optimization():
             "lr": {"max": 0.001, "min": 0.000001},
         },
     }
-    sweep_id = wandb.sweep(sweep_configuration, project="CNN_FLD")
-    wandb.agent(sweep_id, function=main)
+    # sweep_id = wandb.sweep(sweep_configuration, project="CNN_FLD")
+    # wandb.agent(sweep_id, function=main)
+    wandb.agent("60zxtel5", function=main)
 
 
 if __name__ == '__main__':
