@@ -273,9 +273,6 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
                 # Note: You might need to adjust the label tensor shape depending on your loss function's expectation
                 # If your loss function expects labels to have the same batch size as outputs,
                 # you might need to expand or repeat the labels tensor.
-                print(labels.shape)
-                # print(labels.expand_as(outputs).shape)
-                print(outputs.shape)
                 loss = criterion(outputs.squeeze(), labels)
 
 
