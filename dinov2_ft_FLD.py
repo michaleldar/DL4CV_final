@@ -262,7 +262,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
             # image in the list one by one or in smaller batches if needed.
             for images in list_of_images_batch:
                 # images = torch.stack(images).to(device)  # Stack images to form a new batch
-
+                images = images.to(device)
                 # Zero the parameter gradients
                 optimizer.zero_grad()
 
