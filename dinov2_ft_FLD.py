@@ -76,7 +76,7 @@ class CustomDataset(Dataset):
         images = self.transform(image) if self.transform else [image]
         
         # Convert images to tensor after applying EightTransforms
-        images = [transforms.ToTensor()(img) for img in images]
+        # images = [transforms.ToTensor()(img) for img in images]
 
         return images, label
 
