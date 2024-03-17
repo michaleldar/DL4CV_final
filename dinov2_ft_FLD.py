@@ -46,21 +46,39 @@ class DinoVisionTransformerClassifier(nn.Module):
 
 
 class CustomDataset(Dataset):
-    def __init__(self, df, transform=None, image_path_column="image_path"):
+    def __init__(self, df, transform=None, pre_transform=None, image_path_column="image_path"):
         self._image_path_column = image_path_column
         self.df = df
+        self.pre_transform = pre_transform
         self.transform = transform
 
     def __len__(self):
         return len(self.df)
 
+    # def __getitem__(self, idx):
+    #     img_name = self.df.iloc[idx][self._image_path_column]
+    #     image = Image.open(img_name).convert('RGB')
+    #     label = torch.tensor(float(self.df.iloc[idx]["medical_condition"]))
+    #     if self.transform:
+    #         image = self.transform(image)
+    #     return image, label
+
     def __getitem__(self, idx):
-        img_name = self.df.iloc[idx][self._image_path_column]
+        img_name = self.df.iloc[idx][self.image_path_column]
         image = Image.open(img_name).convert('RGB')
         label = torch.tensor(float(self.df.iloc[idx]["medical_condition"]))
-        if self.transform:
-            image = self.transform(image)
-        return image, label
+        
+        # Apply basic pre-transformations
+        if self.pre_transform:
+            image = self.pre_transform(image)
+        
+        # Apply EightTransforms
+        images = self.transform(image) if self.transform else [image]
+        
+        # Convert images to tensor after applying EightTransforms
+        images = [transforms.ToTensor()(img) for img in images]
+
+        return images, label
 
 
 def visualize_self_attention(model, image_path):
@@ -75,7 +93,7 @@ def visualize_self_attention(model, image_path):
 
     model.eval()
     img0 = Image.open(image_path).convert('RGB')
-    img = data_transforms['train'](img0)
+    img = basic_transforms(img0)
     w, h = img.shape[1] - img.shape[1] % PATCH_SIZE, img.shape[2] - img.shape[2] % PATCH_SIZE
     img = img[:, :w, :h].unsqueeze(0)
     w_featmap = img.shape[-2] // PATCH_SIZE
@@ -128,32 +146,73 @@ def visualize_self_attention(model, image_path):
     print("random: ", rnd_text)
     plt.savefig(f"/home/michalel/PycharmProjects/basic/attention_fld_{rnd_text}.png")
 
-data_transforms = {
-        "train": transforms.Compose(
-            [
-                ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
-                transforms.CenterCrop((720, 1000)),
-                # transforms.Resize((224, 224)),
-                transforms.Resize((480, 480)),
-                transforms.RandomRotation(360),
-                transforms.RandomHorizontalFlip(),
-                transforms.RandomVerticalFlip(),
-                transforms.ToTensor()
-            ]
-        ),
-        "validation": transforms.Compose(
-            [
-                ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
-                transforms.CenterCrop((720, 1000)),
-                # transforms.Resize((224, 224)),
-                transforms.Resize((480, 480)),
-                # transforms.RandomRotation(360),
-                # transforms.RandomHorizontalFlip(),
-                # transforms.RandomVerticalFlip(),
-                transforms.ToTensor()
-            ]
-        ),
-    }
+
+class EightTransforms:
+  """Generate all the possible crops using combinations of
+  [90, 180, 270 degrees rotations,  horizontal flips and vertical flips]. 
+  In total there are 8 options."""
+
+  def __init__(self):
+    pass
+
+  def __call__(self, sample):
+    """
+    Args:
+      sample (torch.Tensor) - image to be transformed.
+      Has shape `(num_channels, height, width)`.
+    Returns:
+      output (List(torch.Tensor)) - A list of 8 tensors containing the different
+      flips and rotations of the original image. Each tensor has the same size as 
+      the original image, possibly transposed in the spatial dimensions.
+    """
+
+    flipped = torch.flip(sample, [2])
+    output = self._get_rotations(sample) + self._get_rotations(flipped)
+    return output
+
+  def _get_rotations(self, sample):
+    return [
+            sample,
+            torch.rot90(sample, 1, [1, 2]),
+            torch.rot90(sample, 2, [1, 2]),
+            torch.rot90(sample, 3, [1, 2]),
+    ]
+
+
+
+basic_transforms = transforms.Compose([
+    ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
+    transforms.CenterCrop((720, 1000)),
+    transforms.Resize((480, 480)),
+])
+
+
+# data_transforms = {
+#         "train": transforms.Compose(
+#             [
+#                 ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
+#                 transforms.CenterCrop((720, 1000)),
+#                 # transforms.Resize((224, 224)),
+#                 transforms.Resize((480, 480)),
+#                 transforms.RandomRotation(360),
+#                 transforms.RandomHorizontalFlip(),
+#                 transforms.RandomVerticalFlip(),
+#                 transforms.ToTensor()
+#             ]
+#         ),
+#         "validation": transforms.Compose(
+#             [
+#                 ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
+#                 transforms.CenterCrop((720, 1000)),
+#                 # transforms.Resize((224, 224)),
+#                 transforms.Resize((480, 480)),
+#                 # transforms.RandomRotation(360),
+#                 # transforms.RandomHorizontalFlip(),
+#                 # transforms.RandomVerticalFlip(),
+#                 transforms.ToTensor()
+#             ]
+#         ),
+#     }
 
 
 def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'):
@@ -174,8 +233,10 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     train_split = train_split.dataset.iloc[train_split.indices]
     val_split = val_split.dataset.iloc[val_split.indices]
 
-    train_data = CustomDataset(train_split, transform=data_transforms['train'])
-    val_data = CustomDataset(val_split, transform=data_transforms['validation'])
+    # train_data = CustomDataset(train_split, transform=data_transforms['train'])
+    # val_data = CustomDataset(val_split, transform=data_transforms['validation'])
+    train_data = CustomDataset(train_split, transform=EightTransforms(), pre_transform=basic_transforms)
+    val_data = CustomDataset(val_split, pre_transform=basic_transforms) 
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True, num_workers=0)
     val_loader = DataLoader(val_data, batch_size=32, shuffle=False, num_workers=0)
     model = DinoVisionTransformerClassifier()
@@ -190,22 +251,52 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         print("Epoch: ", epoch)
 
         batch_losses = []
+
         for data in train_loader:
-            # get the input batch and the labels
-            batch_of_images, labels = data
+            # Unpack the data
+            list_of_images_batch, labels = data
+            labels = labels.to(device)  # Assuming labels is a tensor of shape [batch_size]
 
-            # zero the parameter gradients
-            optimizer.zero_grad()
+            # Since all images in the list have the same label, we can process each
+            # image in the list one by one or in smaller batches if needed.
+            for images in list_of_images_batch:
+                images = torch.stack(images).to(device)  # Stack images to form a new batch
 
-            # model prediction
-            output = model(batch_of_images.to(device)).squeeze(dim=1)
+                # Zero the parameter gradients
+                optimizer.zero_grad()
 
-            # compute loss and do gradient descent
-            loss = criterion(output, labels.float().to(device))
-            loss.backward()
-            optimizer.step()
+                # Forward pass: Compute predicted output by passing images to the model
+                outputs = model(images)
 
-            batch_losses.append(loss.item())
+                # Calculate the loss
+                # Note: You might need to adjust the label tensor shape depending on your loss function's expectation
+                # If your loss function expects labels to have the same batch size as outputs,
+                # you might need to expand or repeat the labels tensor.
+                loss = criterion(outputs, labels.expand_as(outputs).squeeze())
+
+                # Backward pass: Compute gradient of the loss with respect to model parameters
+                loss.backward()
+
+                # Perform a single optimization step (parameter update)
+                optimizer.step()
+
+                batch_losses.append(loss.item())
+        # for data in train_loader:
+        #     # get the input batch and the labels
+        #     batch_of_images, labels = data
+
+        #     # zero the parameter gradients
+        #     optimizer.zero_grad()
+
+        #     # model prediction
+        #     output = model(batch_of_images.to(device)).squeeze(dim=1)
+
+        #     # compute loss and do gradient descent
+        #     loss = criterion(output, labels.float().to(device))
+        #     loss.backward()
+        #     optimizer.step()
+
+        #     batch_losses.append(loss.item())
 
         epoch_losses.append(np.mean(batch_losses))
         print(f"Mean epoch loss: {epoch_losses[-1]}")
