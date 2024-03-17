@@ -276,7 +276,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
                 print(labels.shape)
                 print(labels.expand_as(outputs).shape)
                 print(outputs.shape)
-                loss = criterion(outputs, labels.expand_as(outputs).squeeze())
+                loss = criterion(outputs.squeeze(), labels)
 
 
 
