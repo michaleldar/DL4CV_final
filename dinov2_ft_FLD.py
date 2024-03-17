@@ -64,7 +64,7 @@ class CustomDataset(Dataset):
     #     return image, label
 
     def __getitem__(self, idx):
-        img_name = self.df.iloc[idx][self.image_path_column]
+        img_name = self.df.iloc[idx][self._image_path_column]
         image = Image.open(img_name).convert('RGB')
         label = torch.tensor(float(self.df.iloc[idx]["medical_condition"]))
         
