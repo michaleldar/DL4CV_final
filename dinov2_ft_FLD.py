@@ -257,7 +257,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
             # Unpack the data
             list_of_images_batch, labels = data
             labels = labels.to(device)  # Assuming labels is a tensor of shape [batch_size]
-
+            print("images type: ", type(list_of_images_batch))
+            print("images shape: ", list_of_images_batch[0].shape)
             # Since all images in the list have the same label, we can process each
             # image in the list one by one or in smaller batches if needed.
             for images in list_of_images_batch:
