@@ -256,7 +256,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         for data in train_loader:
             # Unpack the data
             list_of_images_batch, labels = data
-            print(len(list_of_images_batch), len(labels))
+            print(list_of_images_batch.shape, labels.shape)
             labels = labels.to(device)  # Assuming labels is a tensor of shape [batch_size]
 
             # Since all images in the list have the same label, we can process each
