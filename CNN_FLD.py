@@ -139,6 +139,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
         # Log metrics
         wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "val_loss": val_loss, "accuracy": accuracy, "F1": f1})
+    # save the model
+    torch.save(model.state_dict(), f'/home/michalel/PycharmProjects/basic/models/cnn_fld.pth')
 
 def sweep_optimization():
 

@@ -308,11 +308,15 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         predictions = []
         y_true = []
         with torch.no_grad():
-            for inputs, labels in val_loader:
-                inputs, labels = inputs.to(device), labels.to(device)
-                outputs = model(inputs)
-                predictions.extend(outputs.squeeze().tolist())
-                y_true.extend(labels.tolist())
+            for data in val_loader:
+                list_of_images_batch, labels = data
+                labels = labels.to(device)
+                for images in list_of_images_batch:
+                    images = images.to(device)
+                    outputs = model(images)
+                    predictions.extend(outputs.squeeze().tolist())
+                    y_true.extend(labels.tolist())
+
             predictions = np.array(predictions)
             y_true = np.array(y_true)
             val_loss = criterion(torch.tensor(predictions).to(device), torch.tensor(y_true).float().to(device))
@@ -329,4 +333,6 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
 if __name__ == '__main__':
     model = main()
+    # save the model
+    torch.save(model.state_dict(), "dino_model.pth")
 
