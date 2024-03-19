@@ -273,7 +273,6 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
                 # If your loss function expects labels to have the same batch size as outputs,
                 # you might need to expand or repeat the labels tensor.
                 loss = criterion(outputs.squeeze(), labels)
-                print(labels)
 
                 # Backward pass: Compute gradient of the loss with respect to model parameters
                 loss.backward()
