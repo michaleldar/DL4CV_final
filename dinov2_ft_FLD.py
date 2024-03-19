@@ -104,7 +104,6 @@ def visualize_self_attention(model, image_path):
 
     # we keep only the output patch attention
     attentions = attentions[0, :, 0, 1:].reshape(nh, -1)
-    print(attentions.shape)
 
     # we keep only a certain percentage of the mass
     val, idx = torch.sort(attentions)
@@ -256,7 +255,6 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         for data in train_loader:
             # Unpack the data
             list_of_images_batch, labels = data
-            print(len(list_of_images_batch[0]), len(labels))
             labels = labels.to(device)  # Assuming labels is a tensor of shape [batch_size]
 
             # Since all images in the list have the same label, we can process each
