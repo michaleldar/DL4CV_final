@@ -44,7 +44,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         print("idx: ", idx)
-        if idx in self.df.indexes:
+        if idx in self.df.index.tolist():
             print("#1 Data leakage detected!")
             sys.exit(1)
         self.indexes.append(idx)
