@@ -235,7 +235,7 @@ def main():
         correlations.append(accuracy)
 
     # Save the trained model
-    # torch.save(model.state_dict(), 'classification_model.pth')
+    torch.save(model.state_dict(), '/home/michalel/DL4CV_final/CNN_FLD.pth')
 
     # Plotting results
     # plot_results(y_true, predictions, label_to_predict)

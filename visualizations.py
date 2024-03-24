@@ -5,7 +5,8 @@ from torchcam.utils import overlay_mask
 from PIL import Image
 import torchvision.transforms as transforms
 
-def grad_cam(image, path_to_model):
+def grad_cam(image_path, path_to_model):
+    image = Image.open(image_path)
     # Load a model
     model = resnet50(pretrained=True)
     model.load_state_dict(torch.load(path_to_model))
@@ -31,7 +32,9 @@ def grad_cam(image, path_to_model):
     # Overlay and display
     # result = overlay_mask(Image.open('path/to/your/image.jpg'), activation_map, alpha=0.5)
     result = overlay_mask(image, activation_map, alpha=0.5)
-    result.show()
+    # result.show()
+    # save the image
+    result.save('grad_cam_result.jpg')
 
 
 
