@@ -184,8 +184,8 @@ def main():
         ]),
     }
 
-    # csv_path = '/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
-    csv_path = 'us_dataset_10_3_24.csv'
+    csv_path = '/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
+    # csv_path = 'us_dataset_10_3_24.csv'
     data = CustomDataset(csv_file=csv_path, label_to_predict=label_to_predict, transform=data_transforms['train'])
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size
