@@ -43,12 +43,6 @@ class CustomDataset(Dataset):
         return len(self.df)
 
     def __getitem__(self, idx):
-        print("idx: ", idx)
-        if idx in self.indexes:
-            print("#1 Data leakage detected!")
-            sys.exit(1)
-        self.indexes.append(idx)
-
         img_name = self.df.iloc[idx][self._image_path_column]
         image = Image.open(img_name).convert('RGB')
         label = torch.tensor(float(self.df.iloc[idx][self._label_to_predict]))
