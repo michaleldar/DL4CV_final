@@ -44,7 +44,7 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         print("idx: ", idx)
-        if idx in self.indexes:
+        if idx in self.df.indexes:
             print("#1 Data leakage detected!")
             sys.exit(1)
         self.indexes.append(idx)
@@ -116,6 +116,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     val_size = len(data) - train_size
     train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=torch.Generator().manual_seed(42))
     # search for data leakage in the dataset
+    print("type of train_dataset: ", type(train_dataset))
     train_indexes = train_dataset.indexes
     val_indexes = val_dataset.indexes
     for idx in train_indexes:
