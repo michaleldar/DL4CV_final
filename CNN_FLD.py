@@ -116,7 +116,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     # val_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=False)
 
     # Model preparation
-    model = models.resnet50(models.ResNet50_Weights.IMAGENET1K_V1)
+    model = models.resnet50('ResNet50_Weights.IMAGENET1K_V1')
     # print(model.fc.in_features)
     # remove the last layer
     # model = nn.Sequential(*list(model.children())[:-1])
