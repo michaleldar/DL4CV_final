@@ -115,18 +115,11 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size
     train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=torch.Generator().manual_seed(42))
-    # search for data leakage in the dataset
-    print("type of train_dataset: ", type(train_dataset))
-    train_indexes = train_dataset.indices
-    val_indexes = val_dataset.indices
-    for idx in train_indexes:
-        if idx in val_indexes:
-            print("#2 Data leakage detected!")
-            sys.exit(1)
 
-
-    train_loader = DataLoader(train_dataset, batch_size=wandb.config.batch_size, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=False)
+    # train_loader = DataLoader(train_dataset, batch_size=wandb.config.batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+    # val_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=False)
 
     # Model preparation
     model = models.resnet50(pretrained=True)
@@ -144,12 +137,14 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         nn.Sigmoid()
     )
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=wandb.config.lr)
+    # optimizer = optim.Adam(model.parameters(), lr=wandb.config.lr)
+    optimizer = optim.Adam(model.parameters(), lr=0.00001)
 
     # Training
     model.to(DEVICE)
     wandb.watch(model, log_freq=100)
-    for epoch in range(wandb.config.epochs):
+    # for epoch in range(wandb.config.epochs):
+    for epoch in range(5):
         train_loss = train(model, train_loader, optimizer, criterion)
         val_loss, predictions, y_true = evaluate(model, val_loader, criterion)
         accuracy = metrics.roc_auc_score(y_true, predictions)
@@ -180,4 +175,5 @@ def sweep_optimization():
 
 
 if __name__ == '__main__':
-    sweep_optimization()
+    # sweep_optimization()
+    main()
