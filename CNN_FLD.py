@@ -117,8 +117,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=torch.Generator().manual_seed(42))
     # search for data leakage in the dataset
     print("type of train_dataset: ", type(train_dataset))
-    train_indexes = train_dataset.indexes
-    val_indexes = val_dataset.indexes
+    train_indexes = train_dataset.indices
+    val_indexes = val_dataset.indices
     for idx in train_indexes:
         if idx in val_indexes:
             print("#2 Data leakage detected!")
