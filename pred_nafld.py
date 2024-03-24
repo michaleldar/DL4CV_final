@@ -102,74 +102,71 @@ def evaluate(model, val_loader, criterion, device):
     # ROC_curve(y_true, pred_before_sigmoid)
     epoch_val_loss = val_loss / len(val_loader.dataset)
     return epoch_val_loss, predictions, y_true
+#
+# def ROC_curve(y_true, predictions):
+#     thresholds = np.arange(0, 1, 0.01)
+#     tpr = []
+#     fpr = []
+#     for threshold in thresholds:
+#         tp = 0
+#         fp = 0
+#         tn = 0
+#         fn = 0
+#         for i in range(len(predictions)):
+#             if predictions[i] >= threshold:
+#                 if y_true[i] == 1:
+#                     tp += 1
+#                 else:
+#                     fp += 1
+#             else:
+#                 if y_true[i] == 1:
+#                     fn += 1
+#                 else:
+#                     tn += 1
+#         tpr.append(tp / (tp + fn))
+#         fpr.append(fp / (fp + tn))
+#     plt.plot(fpr, tpr)
+#     plt.xlabel("False Positive Rate")
+#     plt.ylabel("True Positive Rate")
+#     # add values of the thresholds to the plot
+#     for i in range(len(thresholds)):
+#         if i % 5 == 0:
+#             plt.annotate(str(thresholds[i]), (fpr[i], tpr[i]))
+#     plt.title("ROC Curve")
+#     plt.savefig(f'/home/michalel/PycharmProjects/basic/ResNet_ft_nafld_predictions_ROC_curve.png')
 
-def ROC_curve(y_true, predictions):
-    thresholds = np.arange(0, 1, 0.01)
-    tpr = []
-    fpr = []
-    for threshold in thresholds:
-        tp = 0
-        fp = 0
-        tn = 0
-        fn = 0
-        for i in range(len(predictions)):
-            if predictions[i] >= threshold:
-                if y_true[i] == 1:
-                    tp += 1
-                else:
-                    fp += 1
-            else:
-                if y_true[i] == 1:
-                    fn += 1
-                else:
-                    tn += 1
-        tpr.append(tp / (tp + fn))
-        fpr.append(fp / (fp + tn))
-    plt.plot(fpr, tpr)
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    # add values of the thresholds to the plot
-    for i in range(len(thresholds)):
-        if i % 5 == 0:
-            plt.annotate(str(thresholds[i]), (fpr[i], tpr[i]))
-    plt.title("ROC Curve")
-    plt.savefig(f'/home/michalel/PycharmProjects/basic/ResNet_ft_nafld_predictions_ROC_curve.png')
+# def plot_results(y_true, predictions, label):
+#     y_true = np.array(y_true)
+#     predictions = np.array(predictions)
+#     xy = np.vstack([y_true, predictions])
+#     z = gaussian_kde(xy)(xy)
+#     idx = z.argsort()
+#     x, y, z = y_true[idx], predictions[idx], z[idx]
+#
+#     fig, ax = plt.subplots()
+#     ax.scatter(x, y, c=z, s=25)
+#     plt.xlabel(f"Real {label}")
+#     plt.ylabel(f"Predicted {label}")
+#     pearson_correlation = round(pearsonr(y_true, predictions)[0], 2)
+#     plt.title(f"Predicted {label} vs. Real {label}. Pearson correlation: " + str(pearson_correlation))
+#
+#     axes = plt.gca()
+#     plt.savefig(f'/home/michalel/PycharmProjects/basic/ResNet_ft_predictions_{label}_5_epochs.png')
 
-def plot_results(y_true, predictions, label):
-    y_true = np.array(y_true)
-    predictions = np.array(predictions)
-    xy = np.vstack([y_true, predictions])
-    z = gaussian_kde(xy)(xy)
-    idx = z.argsort()
-    x, y, z = y_true[idx], predictions[idx], z[idx]
-
-    fig, ax = plt.subplots()
-    ax.scatter(x, y, c=z, s=25)
-    plt.xlabel(f"Real {label}")
-    plt.ylabel(f"Predicted {label}")
-    pearson_correlation = round(pearsonr(y_true, predictions)[0], 2)
-    plt.title(f"Predicted {label} vs. Real {label}. Pearson correlation: " + str(pearson_correlation))
-
-    axes = plt.gca()
-    plt.savefig(f'/home/michalel/PycharmProjects/basic/ResNet_ft_predictions_{label}_5_epochs.png')
-
-def plot_correlation(correlations, label):
-    fig, ax = plt.subplots()
-    ax.plot(range(1, len(correlations) + 1), correlations)
-    plt.xlabel("Epoch")
-    plt.ylabel("Pearson Correlation")
-    plt.title("Pearson Correlation as a Function of the Epoch")
-    plt.savefig(f'/home/michalel/PycharmProjects/basic/ResNet_ft_predictions_{label}_5_epochs_correlation.png')
+# def plot_correlation(correlations, label):
+#     fig, ax = plt.subplots()
+#     ax.plot(range(1, len(correlations) + 1), correlations)
+#     plt.xlabel("Epoch")
+#     plt.ylabel("Pearson Correlation")
+#     plt.title("Pearson Correlation as a Function of the Epoch")
+#     plt.savefig(f'/home/michalel/PycharmProjects/basic/ResNet_ft_predictions_{label}_5_epochs_correlation.png')
 
 def main():
-    label_to_predict = sys.argv[1]
-    if label_to_predict not in VALID_LABELS:
-        print(f"Invalid label to predict. Please choose one of the following: {VALID_LABELS}")
-        exit()
+    label_to_predict = "medical_condition"
 
     wandb.init(project=label_to_predict)
     # set the run name to "3 fc hidden layers"
-    wandb.run.name = "3 fc layers"
+    wandb.run.name = "24_3_2024"
 
 
     data_transforms = {
@@ -188,6 +185,7 @@ def main():
     }
 
     csv_path = '/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
+    # csv_path = 'us_dataset_10_3_24.csv'
     data = CustomDataset(csv_file=csv_path, label_to_predict=label_to_predict, transform=data_transforms['train'])
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size
