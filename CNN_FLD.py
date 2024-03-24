@@ -28,12 +28,27 @@ class CustomDataset(Dataset):
         self.df = pd.read_csv(csv_file).drop_duplicates(subset=[self._image_path_column])
         self.df["medical_condition"] = self.df["medical_condition"].apply(lambda x: 0 if x == "DB92" else 1)
         self.df = self.df.dropna(subset=[self._label_to_predict, self._image_path_column], how='any')
+
+        # remove duplicates
+        self.df = self.df.drop_duplicates(subset=[self._image_path_column])
+        # remove duplicate indexes
+        self.df = self.df.reset_index(drop=True)
+
+        # debug indexes for data leakage
+        self.indexes = []
+
         self.transform = transform
 
     def __len__(self):
         return len(self.df)
 
     def __getitem__(self, idx):
+        print("idx: ", idx)
+        if idx in self.indexes:
+            print("#1 Data leakage detected!")
+            sys.exit(1)
+        self.indexes.append(idx)
+
         img_name = self.df.iloc[idx][self._image_path_column]
         image = Image.open(img_name).convert('RGB')
         label = torch.tensor(float(self.df.iloc[idx][self._label_to_predict]))
@@ -49,10 +64,6 @@ class ApplyMaskToImage(object):
     def __call__(self, img):
         img = transforms.ToTensor()(img).to(DEVICE) * self.mask
         return transforms.ToPILImage()(img)
-
-def custom_collate(batch):
-    images, labels = zip(*batch)
-    return torch.stack(images), torch.stack(labels)
 
 def train(model, train_loader, optimizer, criterion):
     model.train()
@@ -104,6 +115,15 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     train_size = int(0.8 * len(data))
     val_size = len(data) - train_size
     train_dataset, val_dataset = random_split(data, [train_size, val_size], generator=torch.Generator().manual_seed(42))
+    # search for data leakage in the dataset
+    print("type of train_dataset: ", type(train_dataset))
+    train_indexes = train_dataset.indices
+    val_indexes = val_dataset.indices
+    for idx in train_indexes:
+        if idx in val_indexes:
+            print("#2 Data leakage detected!")
+            sys.exit(1)
+
 
     train_loader = DataLoader(train_dataset, batch_size=wandb.config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=wandb.config.batch_size, shuffle=False)
@@ -139,6 +159,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
         # Log metrics
         wandb.log({"epoch": epoch + 1, "train_loss": train_loss, "val_loss": val_loss, "accuracy": accuracy, "F1": f1})
+    # save the model
+    torch.save(model.state_dict(), f'/home/michalel/PycharmProjects/basic/models/cnn_fld.pth')
 
 def sweep_optimization():
 
@@ -152,7 +174,7 @@ def sweep_optimization():
             "lr": {"max": 0.001, "min": 0.000001},
         },
     }
-    # sweep_id = wandb.sweep(sweep_configuration, project="CNN_FLD")
+    sweep_id = wandb.sweep(sweep_configuration, project="CNN_FLD")
     # wandb.agent(sweep_id, function=main)
     wandb.agent("60zxtel5", function=main)
 
