@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
-import cv_preprocess as cvp
+# import cv_preprocess as cvp
 import dataset_preprocess as dp
 import CNN_FLD
 import dinov2_ft_FLD as TRANSF_FLD
