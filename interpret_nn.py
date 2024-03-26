@@ -104,6 +104,9 @@ preprocess2 = transforms.Compose([
     transforms.Resize((224, 224)),
 ])
 image = preprocess2(image)
+print(type(image))
+# convert attributions to a PIL image
+attributions = Image.fromarray(attributions)
 
 # reset plot
 plt.clf()
