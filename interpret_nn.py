@@ -53,9 +53,18 @@ plt.show()
 
 model = models.resnet50(pretrained=True)
 num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, 1)
 
-model.load_state_dict(torch.load("/home/michalel/PycharmProjects/basic/bmi_1fc_no_mask_ResNet_ft.pth"))
+    # Modify the model for binary classification
+    model.fc = nn.Sequential(
+        nn.Linear(num_ftrs, 512),
+        nn.ReLU(),
+        nn.Linear(512, 256),
+        nn.ReLU(),
+        nn.Linear(256, 1),
+        nn.Sigmoid()  # Apply sigmoid activation for binary classification
+    )
+
+model.load_state_dict(torch.load("/home/michalel/DL4CV_final/CNN_FLD.pth"))
 model.eval()
 
 # Define the GuidedGradCam explainer
