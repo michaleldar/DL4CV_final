@@ -54,15 +54,15 @@ plt.show()
 model = models.resnet50(pretrained=True)
 num_ftrs = model.fc.in_features
 
-    # Modify the model for binary classification
-    model.fc = nn.Sequential(
-        nn.Linear(num_ftrs, 512),
-        nn.ReLU(),
-        nn.Linear(512, 256),
-        nn.ReLU(),
-        nn.Linear(256, 1),
-        nn.Sigmoid()  # Apply sigmoid activation for binary classification
-    )
+# Modify the model for binary classification
+model.fc = nn.Sequential(
+    nn.Linear(num_ftrs, 512),
+    nn.ReLU(),
+    nn.Linear(512, 256),
+    nn.ReLU(),
+    nn.Linear(256, 1),
+    nn.Sigmoid()  # Apply sigmoid activation for binary classification
+)
 
 model.load_state_dict(torch.load("/home/michalel/DL4CV_final/CNN_FLD.pth"))
 model.eval()
