@@ -29,7 +29,7 @@ def grad_cam(image_path, path_to_model):
     model.load_state_dict(torch.load(path_to_model))
 
     # Instantiate Grad-CAM
-    cam_extractor = GradCAM(model, target_layer='layer4')
+    cam_extractor = GradCAM(model, target_layer=model.layer4)
 
     # Preprocess your image
     preprocess = transforms.Compose([
