@@ -43,7 +43,7 @@ def grad_cam(image_path, path_to_model):
     # img = preprocess(Image.open('path/to/your/image.jpg')).unsqueeze(0)
 
     # Extract the activation map
-    target_category = 0  # None will result in the highest predicted category, originally was None. return to it?
+    target_category = None  # None will result in the highest predicted category, originally was None. return to it?
     activation_map = cam_extractor(img, target_category)
 
     # Overlay and display
