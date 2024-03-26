@@ -86,7 +86,7 @@ attributions = np.array(Image.fromarray(np.transpose(attributions, (1, 2, 0))).r
 # Display the original image and the heatmap
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
-plt.imshow(input_image)
+plt.imshow(np.transpose(input_image.squeeze(0).detach().numpy(), (1, 2, 0)))
 plt.title('Original Image')
 
 plt.subplot(1, 2, 2)
