@@ -3,6 +3,7 @@ from torchvision.models import resnet50
 from torchcam.methods import GradCAM
 from torchcam.utils import overlay_mask
 from PIL import Image
+import torch.nn as nn
 import torchvision.transforms as transforms
 
 from dinov2_ft_FLD import ApplyMaskToImage
@@ -12,6 +13,19 @@ def grad_cam(image_path, path_to_model):
     image = Image.open(image_path)
     # Load a model
     model = resnet50(pretrained=True)
+
+    num_ftrs = model.fc.in_features
+
+    # Modify the model for binary classification
+    model.fc = nn.Sequential(
+        nn.Linear(num_ftrs, 512),
+        nn.ReLU(),
+        nn.Linear(512, 256),
+        nn.ReLU(),
+        nn.Linear(256, 1),
+        nn.Sigmoid()  # Apply sigmoid activation for binary classification
+    )
+
     model.load_state_dict(torch.load(path_to_model))
 
     # Instantiate Grad-CAM
