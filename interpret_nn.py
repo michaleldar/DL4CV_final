@@ -107,8 +107,9 @@ image = preprocess2(image)
 print(attributions.shape)
 # convert attributions to a PIL image
 attributions = Image.fromarray(attributions)
-# take only the last channel of the attributions
-attributions = attributions.split()[0]
+# take only the first channel of the attributions
+attributions = attributions.convert('L')
+# attributions = attributions.split()[0]
 
 # reset plot
 plt.clf()
