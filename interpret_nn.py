@@ -7,6 +7,7 @@ from captum.attr import GuidedGradCam, Deconvolution
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+from torchcam.utils import overlay_mask
 
 image_path = "/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1002254441/00_00_visit/20220915/092714.jpg"
 class ApplyMaskToImage(object):
@@ -35,7 +36,7 @@ class ApplyMaskToImage(object):
 # Define transformations
 preprocess = transforms.Compose([
     ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
-    # transforms.CenterCrop((720, 1000)),
+    transforms.CenterCrop((720, 1000)),
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
 ])
@@ -85,7 +86,7 @@ attributions = np.array(Image.fromarray(np.transpose(attributions, (1, 2, 0))).r
 # Display the original image and the heatmap
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
-plt.imshow(image)
+plt.imshow(input_image)
 plt.title('Original Image')
 
 plt.subplot(1, 2, 2)
@@ -95,5 +96,11 @@ plt.title(f'Guided Grad-CAM Heatmap for Layer4')
 # plt.show()
 plt.savefig("/home/michalel/DL4CV_final/GradCam_layer_4.png")
 
-print("predicted BMI: ", model(input_image))
+print("predicted FLD chance: ", model(input_image))
+
+# reset plot
+plt.clf()
+result = overlay_mask(input_image, attributions, alpha=0.5)
+plt.imshow(result)
+plt.savefig("/home/michalel/DL4CV_final/GradCam_layer_4_overlay.png")
 
