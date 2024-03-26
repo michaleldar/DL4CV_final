@@ -97,10 +97,13 @@ plt.title(f'Guided Grad-CAM Heatmap for Layer4')
 plt.savefig("/home/michalel/DL4CV_final/GradCam_layer_4.png")
 
 print("predicted FLD chance: ", model(input_image))
+image = np.transpose(input_image.squeeze(0).detach().numpy(), (1, 2, 0))
+# contert to PIL image
+image = transforms.ToPILImage()(image)
 
 # reset plot
 plt.clf()
-result = overlay_mask(input_image, attributions, alpha=0.5)
+result = overlay_mask(image, attributions, alpha=0.5)
 plt.imshow(result)
 plt.savefig("/home/michalel/DL4CV_final/GradCam_layer_4_overlay.png")
 
