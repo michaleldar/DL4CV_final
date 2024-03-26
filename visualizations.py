@@ -5,6 +5,9 @@ from torchcam.utils import overlay_mask
 from PIL import Image
 import torchvision.transforms as transforms
 
+from dinov2_ft_FLD import ApplyMaskToImage
+
+
 def grad_cam(image_path, path_to_model):
     image = Image.open(image_path)
     # Load a model
@@ -16,7 +19,7 @@ def grad_cam(image_path, path_to_model):
 
     # Preprocess your image
     preprocess = transforms.Compose([
-        # ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
+        ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
         transforms.CenterCrop((720, 1000)),
         transforms.Resize((224, 224)),
         transforms.ToTensor(),

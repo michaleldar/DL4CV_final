@@ -11,7 +11,7 @@ import visualizations
 
 if __name__ == '__main__':
     image_path = "/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/1002254441/00_00_visit/20220915/092714.jpg"
-    model_path = "/home/michalel/DL4CV_final/NAFLD_CNN.pth"
+    model_path = "/home/michalel/DL4CV_final/CNN_FLD.pth"
     visualizations.grad_cam(image_path, model_path)
     # dataset_path = 'us_dataset_10_3_24.csv'
     # print("Creating dataset...")
