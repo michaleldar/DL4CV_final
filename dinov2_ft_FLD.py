@@ -331,7 +331,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         wandb.log({"epoch_loss": epoch_losses[-1],
                    "validation_loss": val_loss.item(),
                    "accuracy": accuracy, "roc_auc": roc_auc, "F1": f1})
-        return model
+    return model
 
 
 if __name__ == '__main__':
