@@ -253,8 +253,13 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
         batch_losses = []
 
-        for data in train_loader:
+        # print the progress of the training
+        for i, data in enumerate(train_loader):
+        # for data in train_loader:
             print("in data loop")
+            # print the progress of the training
+            if i % 10 == 0:
+                print(f"Batch {i}/{len(train_loader)}")
             # Unpack the data
             list_of_images_batch, labels = data
             labels = labels.to(device)  # Assuming labels is a tensor of shape [batch_size]
