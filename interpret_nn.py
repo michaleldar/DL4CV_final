@@ -9,6 +9,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
 from torchcam.utils import overlay_mask
+import shutil
+
 
 class ApplyMaskToImage(object):
     def __init__(self, mask_path):
@@ -132,7 +134,14 @@ non_FLD_images = [
     '/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/7182860236/00_00_visit/20230216/095354.jpg',
     '/net/mraid20/export/genie/LabData/Data/10K/aws_lab_files/ultrasound/jpg/6792297864/00_00_visit/20220323/101933.jpg']
 
+# for i in range(len(FLD_images)):
+#     visualize_grad_cam(FLD_images[i], model, True)
+# for i in range(len(non_FLD_images)):
+#     visualize_grad_cam(non_FLD_images[i], model, False)
+
+# iterate over the images and copy them to "gradcam_results/raw" folder
 for i in range(len(FLD_images)):
-    visualize_grad_cam(FLD_images[i], model, True)
+    shutil.copy(FLD_images[i], f'gradcam_results/raw/FLD_{i}.jpg')
 for i in range(len(non_FLD_images)):
-    visualize_grad_cam(non_FLD_images[i], model, False)
+    shutil.copy(non_FLD_images[i], f'gradcam_results/raw/non_FLD_{i}.jpg')
+
