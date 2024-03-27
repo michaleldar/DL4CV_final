@@ -256,7 +256,6 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         # print the progress of the training
         for i, data in enumerate(train_loader):
         # for data in train_loader:
-            print("in data loop")
             # print the progress of the training
             if i % 10 == 0:
                 print(f"Batch {i}/{len(train_loader)}")
@@ -267,7 +266,6 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
             # Since all images in the list have the same label, we can process each
             # image in the list one by one or in smaller batches if needed.
             for images in list_of_images_batch:
-                print("in images loop")
                 # images = torch.stack(images).to(device)  # Stack images to form a new batch
                 images = images.to(device)
                 # Zero the parameter gradients
