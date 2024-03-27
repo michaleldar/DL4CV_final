@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 from dinov2_ft_FLD import ApplyMaskToImage
 
 
-def grad_cam(image_path, path_to_model):
+def grad_cam(image_path, path_to_model, is_fld=True):
     image = Image.open(image_path)
     # Load a model
     model = resnet50(pretrained=True)
@@ -50,8 +50,12 @@ def grad_cam(image_path, path_to_model):
     # result = overlay_mask(Image.open('path/to/your/image.jpg'), activation_map, alpha=0.5)
     result = overlay_mask(image, activation_map, alpha=0.5)
     # result.show()
+    # add title to the image
+    result.title = "FLD positive: " + str(is_fld)
+    # extract the patient ID from the image path
+    patient_id = image_path.split('/')[-4]
     # save the image
-    result.save('grad_cam_result.jpg')
+    result.save(f'gradcam_results/grad_cam_result_{patient_id}_{is_fld}.jpg')
 
 
 
