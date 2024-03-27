@@ -330,7 +330,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
 
 if __name__ == '__main__':
-    model = main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv')
+    # model = main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv')
+    model = main(dataset_path='/home/michalel/DL4CV_final/us_dataset_10_3_24.csv')
     # save the model
     torch.save(model.state_dict(), "dino_model.pth")
 
