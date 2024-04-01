@@ -159,7 +159,7 @@ def visualize_self_attention(image_path, model, is_fld=True):
 
     image = preprocess2(img0)
 
-    result = overlay_mask(image, to_pil_image(attentions_mean), alpha=0.5)
+    result = overlay_mask_2(image, to_pil_image(attentions_mean), alpha=0.5)
 
     result.title = "FLD positive: " + str(is_fld)
     # save the image
@@ -288,10 +288,10 @@ non_FLD_images = [
 
 for i in range(len(FLD_images)):
     visualize_grad_cam(FLD_images[i], model, True)
-    visualize_self_attention_2(FLD_images[i], dino_model, True)
+    visualize_self_attention(FLD_images[i], dino_model, True)
 for i in range(len(non_FLD_images)):
     visualize_grad_cam(non_FLD_images[i], model, False)
-    visualize_self_attention_2(non_FLD_images[i], dino_model, False)
+    visualize_self_attention(non_FLD_images[i], dino_model, False)
 
 # iterate over the images and copy them to "gradcam_results/raw" folder
 # for i in range(len(FLD_images)):
