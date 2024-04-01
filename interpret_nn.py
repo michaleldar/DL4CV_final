@@ -165,6 +165,9 @@ def visualize_self_attention(image_path, model, is_fld=True):
     attentions_mean = attributions.convert('L')
     # plot the attention mean and save the image
     plt.clf()
+    plt.imshow(attentions_mean)
+    plt.axis("off")
+    plt.savefig(f'attention_maps/attention_maps_base_result_{patient_id}_{is_fld}.jpg')
 
     result = overlay_mask(image, attentions_mean, alpha=0.5)
 
