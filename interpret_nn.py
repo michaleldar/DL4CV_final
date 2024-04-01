@@ -165,6 +165,83 @@ def visualize_self_attention(image_path, model, is_fld=True):
     # save the image
     result.save(f'attention_maps/attention_maps_overlay_result_{patient_id}_{is_fld}.jpg')
 
+
+######################
+def overlay_mask_2(image, attention_map, alpha=0.5):
+    """Overlay attention map on the input image."""
+    heatmap = plt.get_cmap('jet')(attention_map)[:, :, :3]  # Use 'jet' colormap for visualization
+    heatmap = Image.fromarray((heatmap * 255).astype(np.uint8))
+    heatmap = heatmap.resize(image.size, resample=Image.BILINEAR)
+    result = Image.blend(image, heatmap, alpha=alpha)
+    return result
+
+def visualize_self_attention_2(image_path, model, is_fld=True):
+    patient_id = image_path.split('/')[-4]
+    for p in model.parameters():
+        p.requires_grad = False
+
+    model.eval()
+    img0 = Image.open(image_path).convert('RGB')
+    preprocess = torch.hub.load('facebookresearch/dino:main', 'dino_preprocess')
+    img = preprocess(img0)
+    w, h = img.shape[1] - img.shape[1] % model.transformer.patch_embed.patch_size, img.shape[2] - img.shape[2] % model.transformer.patch_embed.patch_size
+    img = img[:, :w, :h].unsqueeze(0)
+    w_featmap = img.shape[-2] // model.transformer.patch_embed.patch_size
+    h_featmap = img.shape[-1] // model.transformer.patch_embed.patch_size
+
+    attentions = model(img).keys()[-1]  # Get the last layer attentions
+    nh = attentions.shape[1]  # number of heads
+
+    # we keep only the output patch attention
+    attentions = attentions[0, :, 0, 1:].reshape(nh, -1)
+
+    # we keep only a certain percentage of the mass
+    val, idx = torch.sort(attentions)
+    val /= torch.sum(val, dim=1, keepdim=True)
+    cumval = torch.cumsum(val, dim=1)
+    threshold = 0.6  # We visualize masks obtained by thresholding the self-attention maps to keep xx% of the mass.
+    th_attn = cumval > (1 - threshold)
+    idx2 = torch.argsort(idx)
+    for head in range(nh):
+        th_attn[head] = th_attn[head][idx2[head]]
+
+    th_attn = th_attn.reshape(nh, w_featmap // 2, h_featmap // 2).float()
+
+    # interpolate
+    th_attn = nn.functional.interpolate(th_attn.unsqueeze(0), scale_factor=model.transformer.patch_embed.patch_size, mode="nearest")[0].cpu().numpy()
+
+    attentions = attentions.reshape(nh, w_featmap // 2, h_featmap // 2)
+    attentions = nn.functional.interpolate(attentions.unsqueeze(0), scale_factor=model.transformer.patch_embed.patch_size, mode="nearest")[0].cpu().numpy()
+    attentions_mean = np.mean(attentions, axis=0)
+    plt.figure(figsize=(6, 6), dpi=200)
+
+    plt.subplot(3, 3, 1)
+    plt.title("Original", size=6)
+    plt.imshow(img0)
+    plt.axis("off")
+
+    plt.subplot(3, 3, 2)
+    plt.title("Attentions Mean", size=6)
+    plt.imshow(attentions_mean)
+    plt.axis("off")
+
+    for i in range(6):
+        plt.subplot(3, 3, i + 4)
+        plt.title("Attentions " + str(i), size=6)
+        plt.imshow(attentions[i])
+        plt.axis("off")
+    plt.savefig(f"/home/michalel/DL4CV_final/attention_maps/attention_fld_{patient_id}_{is_fld}.png")
+
+    image = preprocess(img0)
+
+    result = overlay_mask_2(image, attentions_mean, alpha=0.5)
+
+    result.title = "FLD positive: " + str(is_fld)
+    # save the image
+    result.save(f'/home/michalel/DL4CV_final/attention_maps/attention_maps_overlay_result_{patient_id}_{is_fld}.jpg')
+
+
+######################
 dino_model = dinov2_ft_FLD.DinoVisionTransformerClassifier()
 dino_model.load_state_dict(torch.load("/home/michalel/DL4CV_final/dino_model.pth"))
 dino_model.eval()
@@ -212,10 +289,10 @@ non_FLD_images = [
 
 for i in range(len(FLD_images)):
     visualize_grad_cam(FLD_images[i], model, True)
-    visualize_self_attention(FLD_images[i], dino_model, True)
+    visualize_self_attention_2(FLD_images[i], dino_model, True)
 for i in range(len(non_FLD_images)):
     visualize_grad_cam(non_FLD_images[i], model, False)
-    visualize_self_attention(non_FLD_images[i], dino_model, False)
+    visualize_self_attention_2(non_FLD_images[i], dino_model, False)
 
 # iterate over the images and copy them to "gradcam_results/raw" folder
 # for i in range(len(FLD_images)):
