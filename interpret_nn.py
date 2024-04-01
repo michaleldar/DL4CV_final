@@ -182,7 +182,6 @@ def visualize_self_attention_2(image_path, model, is_fld=True):
 
     model.eval()
     img0 = Image.open(image_path).convert('RGB')
-    preprocess = torch.hub.load('facebookresearch/dino:main', 'dino_preprocess')
     img = preprocess(img0)
     w, h = img.shape[1] - img.shape[1] % model.transformer.patch_embed.patch_size, img.shape[2] - img.shape[2] % model.transformer.patch_embed.patch_size
     img = img[:, :w, :h].unsqueeze(0)
