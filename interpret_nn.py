@@ -188,7 +188,7 @@ def visualize_self_attention_2(image_path, model, is_fld=True):
     w_featmap = img.shape[-2] // model.transformer.patch_embed.patch_size
     h_featmap = img.shape[-1] // model.transformer.patch_embed.patch_size
 
-    attentions = model(img).keys()[-1]  # Get the last layer attentions
+    attentions = model.transformer.get_last_selfattention(img)  # Get the last layer attentions
     nh = attentions.shape[1]  # number of heads
 
     # we keep only the output patch attention
