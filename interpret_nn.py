@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
 from torchcam.utils import overlay_mask
+from torchvision.transforms.functional import to_pil_image
 import shutil
 
 import dinov2_ft_FLD
@@ -157,12 +158,8 @@ def visualize_self_attention(image_path, model, is_fld=True):
     plt.savefig(f"/home/michalel/DL4CV_final/attention_maps/attention_fld_{patient_id}_{is_fld}.png")
 
     image = preprocess2(img0)
-    # convert attributions to a PIL image
-    attentions_mean = Image.fromarray(attentions_mean)
-    # take only the first channel of the attributions
-    # attentions_mean = attentions_mean.convert('L')
 
-    result = overlay_mask(image, attentions_mean, alpha=0.5)
+    result = overlay_mask(image, to_pil_image(attentions_mean.squeeze(0), mode="F"), alpha=0.5)
 
     result.title = "FLD positive: " + str(is_fld)
     # save the image
