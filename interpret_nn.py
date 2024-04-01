@@ -169,6 +169,9 @@ def visualize_self_attention(image_path, model, is_fld=True):
     attentions_mean = attributions.convert('L')
     # plot the attention mean and save the image
     plt.clf()
+    # convert attentions_mean to a PIL image
+    attentions_mean = Image.fromarray(attentions_mean)
+
 
     result = overlay_mask(image, attentions_mean, alpha=0.5)
 
