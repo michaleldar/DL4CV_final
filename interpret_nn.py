@@ -75,7 +75,7 @@ def visualize_grad_cam(image_path, model, is_fld=True):
 
     print("predicted FLD chance: ", model(input_image))
     preprocess2 = transforms.Compose([
-        transforms.CenterCrop((690, 800)),
+        transforms.CenterCrop((600, 900)),
         transforms.Resize((224, 224)),
     ])
     image = preprocess2(image)
