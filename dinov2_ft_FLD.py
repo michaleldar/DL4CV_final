@@ -37,7 +37,7 @@ class DinoVisionTransformerClassifier(nn.Module):
         super(DinoVisionTransformerClassifier, self).__init__()
         dinov2_vits16 = torch.hub.load('facebookresearch/dino:main', 'dino_vits16')
         self.transformer = deepcopy(dinov2_vits16)
-        self.classifier = nn.Sequential(nn.Linear(384, 256), nn.ReLU(), nn.Linear(256, 1))
+        self.classifier = nn.Sequential(nn.Linear(384, 256), nn.ReLU(), nn.Linear(256, 1), nn.Sigmoid())
 
     def forward(self, x):
         x = self.transformer(x)
@@ -321,11 +321,17 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
                     y_true.extend(labels.tolist())
 
             predictions = np.array(predictions)
+            print ("dino predictions:", predictions)
             y_true = np.array(y_true)
             val_loss = criterion(torch.tensor(predictions).to(device), torch.tensor(y_true).float().to(device))
         print(f"Validation loss: {val_loss.item()}")
         accuracy = np.mean(np.round(predictions) == y_true)
         f1 = f1_score(y_true, [1 if p > 0.9 else 0 for p in predictions])
+
+        # plot the distribution of the predictions and save
+        plt.hist(predictions, bins=30)
+        wandb.log({"predictions": wandb.Histogram(np.array(predictions))})
+        
         roc_auc = roc_auc_score(y_true, predictions)
         print(f"Validation accuracy: {accuracy}", f"ROC AUC: {roc_auc}, F1: {f1}")
         wandb.log({"epoch_loss": epoch_losses[-1],
