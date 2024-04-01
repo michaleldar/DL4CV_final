@@ -11,6 +11,9 @@ import numpy as np
 from torchcam.utils import overlay_mask
 import shutil
 
+import dinov2_ft_FLD
+
+PATCH_SIZE = 8
 
 class ApplyMaskToImage(object):
     def __init__(self, mask_path):
@@ -93,6 +96,68 @@ def visualize_grad_cam(image_path, model, is_fld=True):
     result.save(f'gradcam_results/grad_cam_overlay_result_{patient_id}_{is_fld}.jpg')
 
 
+
+def visualize_self_attention(image_path, model, is_fld=True):
+    patient_id = image_path.split('/')[-4]
+    for p in model.parameters():
+        p.requires_grad = False
+
+    model.eval()
+    img0 = Image.open(image_path).convert('RGB')
+    img = preprocess(img0)
+    w, h = img.shape[1] - img.shape[1] % PATCH_SIZE, img.shape[2] - img.shape[2] % PATCH_SIZE
+    img = img[:, :w, :h].unsqueeze(0)
+    w_featmap = img.shape[-2] // PATCH_SIZE
+    h_featmap = img.shape[-1] // PATCH_SIZE
+
+    attentions = model.transformer.get_last_selfattention(img)  # model.get_last_selfattention(img)
+    nh = attentions.shape[1]  # number of head
+
+    # we keep only the output patch attention
+    attentions = attentions[0, :, 0, 1:].reshape(nh, -1)
+
+    # we keep only a certain percentage of the mass
+    val, idx = torch.sort(attentions)
+    val /= torch.sum(val, dim=1, keepdim=True)
+    cumval = torch.cumsum(val, dim=1)
+    threshold = 0.6  # We visualize masks obtained by thresholding the self-attention maps to keep xx% of the mass.
+    th_attn = cumval > (1 - threshold)
+    idx2 = torch.argsort(idx)
+    for head in range(nh):
+        th_attn[head] = th_attn[head][idx2[head]]
+
+    th_attn = th_attn.reshape(nh, w_featmap // 2, h_featmap // 2).float()
+
+    # interpolate
+    th_attn = nn.functional.interpolate(th_attn.unsqueeze(0), scale_factor=PATCH_SIZE, mode="nearest")[0].cpu().numpy()
+
+    attentions = attentions.reshape(nh, w_featmap // 2, h_featmap // 2)
+    attentions = nn.functional.interpolate(attentions.unsqueeze(0), scale_factor=PATCH_SIZE, mode="nearest")[
+        0].cpu().numpy()
+    attentions_mean = np.mean(attentions, axis=0)
+    plt.figure(figsize=(6, 6), dpi=200)
+
+    plt.subplot(3, 3, 1)
+    plt.title("Original", size=6)
+    plt.imshow(img0)
+    plt.axis("off")
+
+    plt.subplot(3, 3, 2)
+    plt.title("Attentions Mean", size=6)
+    plt.imshow(attentions_mean)
+    plt.axis("off")
+
+    for i in range(6):
+        plt.subplot(3, 3, i + 4)
+        plt.title("Attentions " + str(i), size=6)
+        plt.imshow(attentions[i])
+        plt.axis("off")
+    plt.savefig(f"/home/michalel/DL4CV_final/attention_maps/attention_fld_{patient_id}_{is_fld}.png")
+
+dino_model = dinov2_ft_FLD.DinoVisionTransformerClassifier()
+dino_model.load_state_dict(torch.load("/home/michalel/DL4CV_final/dino_model.pth"))
+dino_model.eval()
+
 model = models.resnet50(pretrained=True)
 num_ftrs = model.fc.in_features
 
@@ -136,8 +201,10 @@ non_FLD_images = [
 
 for i in range(len(FLD_images)):
     visualize_grad_cam(FLD_images[i], model, True)
+    visualize_self_attention(FLD_images[i], dino_model, True)
 for i in range(len(non_FLD_images)):
     visualize_grad_cam(non_FLD_images[i], model, False)
+    visualize_self_attention(non_FLD_images[i], dino_model, False)
 
 # iterate over the images and copy them to "gradcam_results/raw" folder
 # for i in range(len(FLD_images)):
