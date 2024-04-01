@@ -160,7 +160,7 @@ def visualize_self_attention(image_path, model, is_fld=True):
     # convert attributions to a PIL image
     attentions_mean = Image.fromarray(attentions_mean)
     # take only the first channel of the attributions
-    attentions_mean = attentions_mean.convert('L')
+    # attentions_mean = attentions_mean.convert('L')
 
     result = overlay_mask(image, attentions_mean, alpha=0.5)
 
