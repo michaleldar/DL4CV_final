@@ -173,7 +173,7 @@ def visualize_self_attention(image_path, model, is_fld=True):
     # convert from ndarray to tensor
 
 
-    attentions_mean = torch.tensor(attentions_mean).squeeze(0).detach().numpy()
+    # attentions_mean = torch.tensor(attentions_mean).squeeze(0).detach().numpy()
     # Normalizing the attention map
     attentions_mean = (attentions_mean - attentions_mean.min()) / (attentions_mean.max() - attentions_mean.min()) * 255
     attentions_mean = attentions_mean.astype(np.uint8)
