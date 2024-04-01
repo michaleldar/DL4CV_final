@@ -182,7 +182,7 @@ class EightTransforms:
 
 basic_transforms = transforms.Compose([
     ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
-    transforms.CenterCrop((600, 900)),
+    transforms.CenterCrop((650, 950)),
     transforms.Resize((480, 480)),
     transforms.ToTensor()
 ])

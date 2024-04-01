@@ -38,7 +38,7 @@ class ApplyMaskToImage(object):
 # Define transformations
 preprocess = transforms.Compose([
     ApplyMaskToImage('/home/michalel/PycharmProjects/basic/US_mask.jpg'),
-    transforms.CenterCrop((720, 1000)),
+    transforms.CenterCrop((650, 950)),
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
 ])
