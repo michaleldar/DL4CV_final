@@ -159,7 +159,9 @@ def visualize_self_attention(image_path, model, is_fld=True):
 
     image = preprocess2(img0)
 
-    result = overlay_mask_2(image, to_pil_image(attentions_mean), alpha=0.5)
+    print(attentions_mean.shape)
+
+    result = overlay_mask(image, to_pil_image(attentions_mean), alpha=0.5)
 
     result.title = "FLD positive: " + str(is_fld)
     # save the image
