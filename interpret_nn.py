@@ -171,10 +171,12 @@ def visualize_self_attention(image_path, model, is_fld=True):
     # attentions_mean = Image.fromarray(attentions_mean)
     # attentions_mean = attentions_mean.convert('L')
     # convert from ndarray to tensor
-    attentions_mean = torch.tensor(attentions_mean).unsqueeze(0).float()
+
+
+    attentions_mean = torch.tensor(attentions_mean).squeeze(0).detach().numpy()
     attentions_mean = Image.fromarray(attentions_mean)
     # take only the first channel of the attributions
-    attributions = attributions.convert('L')
+    attentions_mean = attentions_mean.convert('L')
 
     print("shape of attentions_mean after: ",attentions_mean.size)
 
