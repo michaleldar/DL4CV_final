@@ -206,7 +206,7 @@ def visualize_self_attention(image_path, model, is_fld=True):
 
 
     plt.clf()
-    result = overlay_mask(image, attentions_mean, alpha=0.3)
+    result = overlay_mask(image, attentions_mean, alpha=0.7)
 
     result.title = "FLD positive: " + str(is_fld)
     # save the image
@@ -214,7 +214,7 @@ def visualize_self_attention(image_path, model, is_fld=True):
 
 
 dino_model = dinov2_ft_FLD.DinoVisionTransformerClassifier()
-dino_model.load_state_dict(torch.load("/home/michalel/DL4CV_final/dino_model.pth"))
+dino_model.load_state_dict(torch.load("/home/michalel/DL4CV_final/dino_ft_FLD.pth"))
 dino_model.eval()
 
 model = models.resnet50(pretrained=True)
