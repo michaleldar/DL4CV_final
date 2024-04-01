@@ -132,7 +132,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
     )
     criterion = nn.BCEWithLogitsLoss()
     # optimizer = optim.Adam(model.parameters(), lr=wandb.config.lr)
-    optimizer = optim.Adamw(model.parameters(), lr=0.00001)
+    optimizer = optim.AdamW(model.parameters(), lr=0.00001)
 
     # Training
     model.to(DEVICE)
