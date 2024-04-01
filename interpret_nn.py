@@ -159,13 +159,20 @@ def visualize_self_attention(image_path, model, is_fld=True):
 
     image = preprocess2(img0)
 
-    print(attentions_mean.shape)
+    print("shape of attentions_mean before: ",attentions_mean.shape)
+    print ("type of attentions_mean before: ",type(attentions_mean))
+    print (type(image))
     # attributions = Image.fromarray(attentions_mean)
     # take only the first channel of the attributions
     # attentions_mean = attributions.convert('L')
     # plot the attention mean and save the image
     # convert attentions_mean to a PIL image
+
     attentions_mean = Image.fromarray(attentions_mean)
+    print("shape of attentions_mean after: ",attentions_mean.shape)
+
+    print ("type of attentions_mean after: ",type(attentions_mean))
+
     plt.clf()
     plt.imshow(attentions_mean)
     plt.axis("off")
