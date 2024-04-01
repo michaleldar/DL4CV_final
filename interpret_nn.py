@@ -167,16 +167,16 @@ def visualize_self_attention(image_path, model, is_fld=True):
     # attentions_mean = attributions.convert('L')
     # plot the attention mean and save the image
     # convert attentions_mean to a PIL image
+    plt.clf()
+    plt.imshow(attentions_mean)
+    plt.axis("off")
+    plt.savefig(f'attention_maps/attention_maps_base_result_{patient_id}_{is_fld}.jpg')
 
     attentions_mean = Image.fromarray(attentions_mean)
     print("shape of attentions_mean after: ",attentions_mean.size)
 
     print ("type of attentions_mean after: ",type(attentions_mean))
 
-    plt.clf()
-    plt.imshow(attentions_mean)
-    plt.axis("off")
-    plt.savefig(f'attention_maps/attention_maps_base_result_{patient_id}_{is_fld}.jpg')
 
 
     plt.clf()
