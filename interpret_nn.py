@@ -160,19 +160,19 @@ def visualize_self_attention(image_path, model, is_fld=True):
     image = preprocess2(img0)
 
     print(attentions_mean.shape)
+    # attributions = Image.fromarray(attentions_mean)
+    # take only the first channel of the attributions
+    # attentions_mean = attributions.convert('L')
+    # plot the attention mean and save the image
+    # convert attentions_mean to a PIL image
+    attentions_mean = Image.fromarray(attentions_mean)
     plt.clf()
     plt.imshow(attentions_mean)
     plt.axis("off")
     plt.savefig(f'attention_maps/attention_maps_base_result_{patient_id}_{is_fld}.jpg')
-    attributions = Image.fromarray(attentions_mean)
-    # take only the first channel of the attributions
-    attentions_mean = attributions.convert('L')
-    # plot the attention mean and save the image
+
+
     plt.clf()
-    # convert attentions_mean to a PIL image
-    attentions_mean = Image.fromarray(attentions_mean)
-
-
     result = overlay_mask(image, attentions_mean, alpha=0.5)
 
     result.title = "FLD positive: " + str(is_fld)
