@@ -130,9 +130,9 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         nn.Linear(256, 1),
         nn.Sigmoid()
     )
-    criterion = nn.BCELoss()
+    criterion = nn.BCEWithLogitsLoss()
     # optimizer = optim.Adam(model.parameters(), lr=wandb.config.lr)
-    optimizer = optim.Adam(model.parameters(), lr=0.00001)
+    optimizer = optim.Adamw(model.parameters(), lr=0.00001)
 
     # Training
     model.to(DEVICE)
