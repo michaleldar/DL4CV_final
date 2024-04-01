@@ -168,8 +168,11 @@ def visualize_self_attention(image_path, model, is_fld=True):
     # plot the attention mean and save the image
     # convert attentions_mean to a PIL image
 
-    attentions_mean = Image.fromarray(attentions_mean)
-    attentions_mean = attentions_mean.convert('L')
+    # attentions_mean = Image.fromarray(attentions_mean)
+    # attentions_mean = attentions_mean.convert('L')
+    attentions_mean = to_pil_image(attentions_mean)
+    # attentions_mean = attentions_mean.split()[0]
+
     print("shape of attentions_mean after: ",attentions_mean.size)
 
     print ("type of attentions_mean after: ",type(attentions_mean))
