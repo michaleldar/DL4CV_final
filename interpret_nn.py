@@ -160,6 +160,7 @@ def visualize_self_attention(image_path, model, is_fld=True):
     image = preprocess2(img0)
 
     print(attentions_mean.shape)
+    plt.clf()
     plt.imshow(attentions_mean)
     plt.axis("off")
     plt.savefig(f'attention_maps/attention_maps_base_result_{patient_id}_{is_fld}.jpg')
