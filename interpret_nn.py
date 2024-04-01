@@ -154,6 +154,12 @@ def visualize_self_attention(image_path, model, is_fld=True):
         plt.axis("off")
     plt.savefig(f"/home/michalel/DL4CV_final/attention_maps/attention_fld_{patient_id}_{is_fld}.png")
 
+    result = overlay_mask(img, attentions_mean, alpha=0.5)
+
+    result.title = "FLD positive: " + str(is_fld)
+    # save the image
+    result.save(f'attention_maps/attention_maps_overlay_result_{patient_id}_{is_fld}.jpg')
+
 dino_model = dinov2_ft_FLD.DinoVisionTransformerClassifier()
 dino_model.load_state_dict(torch.load("/home/michalel/DL4CV_final/dino_model.pth"))
 dino_model.eval()
