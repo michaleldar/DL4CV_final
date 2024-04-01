@@ -175,10 +175,12 @@ def visualize_self_attention(image_path, model, is_fld=True):
 
     attentions_mean = torch.tensor(attentions_mean).squeeze(0).detach().numpy()
     # Normalizing the attention map
-    attentions_mean = (255 * (attentions_mean - attentions_mean.min()) / (attentions_mean.max() - attentions_mean.min())).byte()
+    attentions_mean = (attentions_mean - attentions_mean.min()) / (attentions_mean.max() - attentions_mean.min()) * 255
+    attentions_mean = attentions_mean.astype(np.uint8)
+    # attentions_mean = (255 * (attentions_mean - attentions_mean.min()) / (attentions_mean.max() - attentions_mean.min())).byte()
 
     # Converting to a NumPy array
-    attentions_mean = attentions_mean.cpu().numpy()
+    # attentions_mean = attentions_mean.cpu().numpy()
     attentions_mean = Image.fromarray(attentions_mean)
     # take only the first channel of the attributions
     attentions_mean = attentions_mean.convert('L')
