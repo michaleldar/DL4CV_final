@@ -46,6 +46,11 @@ preprocess = transforms.Compose([
     transforms.ToTensor(),
 ])
 
+preprocess2 = transforms.Compose([
+        transforms.CenterCrop((650, 950)),
+        transforms.Resize((224, 224)),
+    ])
+
 def visualize_grad_cam(image_path, model, is_fld=True):
     patient_id = image_path.split('/')[-4]
     # Load and preprocess the image
@@ -77,10 +82,7 @@ def visualize_grad_cam(image_path, model, is_fld=True):
     plt.savefig(f'gradcam_results/grad_cam_base_result_{patient_id}_{is_fld}.jpg')
 
     print("predicted FLD chance: ", model(input_image))
-    preprocess2 = transforms.Compose([
-        transforms.CenterCrop((650, 950)),
-        transforms.Resize((224, 224)),
-    ])
+
     image = preprocess2(image)
     # convert attributions to a PIL image
     attributions = Image.fromarray(attributions)
@@ -154,7 +156,13 @@ def visualize_self_attention(image_path, model, is_fld=True):
         plt.axis("off")
     plt.savefig(f"/home/michalel/DL4CV_final/attention_maps/attention_fld_{patient_id}_{is_fld}.png")
 
-    result = overlay_mask(img, attentions_mean, alpha=0.5)
+    image = preprocess2(img0)
+    # convert attributions to a PIL image
+    attentions_mean = Image.fromarray(attentions_mean)
+    # take only the first channel of the attributions
+    attentions_mean = attentions_mean.convert('L')
+
+    result = overlay_mask(image, attentions_mean, alpha=0.5)
 
     result.title = "FLD positive: " + str(is_fld)
     # save the image
