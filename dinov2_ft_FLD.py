@@ -331,7 +331,7 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
         # plot the distribution of the predictions and save
         # plt.hist(predictions, bins=30)
         # wandb.log({"predictions": wandb.Histogram(np.array(predictions))})
-        wandb.Histogram(np.histogram(predictions, bins=30))
+        # wandb.Histogram(np.histogram(predictions, bins=30))
 
         roc_auc = roc_auc_score(y_true, predictions)
         print(f"Validation accuracy: {accuracy}", f"ROC AUC: {roc_auc}, F1: {f1}")
@@ -342,8 +342,8 @@ def main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv'
 
 
 if __name__ == '__main__':
-    # model = main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv')
-    model = main(dataset_path='/home/michalel/DL4CV_final/us_dataset_10_3_24.csv')
+    model = main(dataset_path='/home/michalel/PycharmProjects/basic/us_full_dataset.csv')
+    # model = main(dataset_path='/home/michalel/DL4CV_final/us_dataset_10_3_24.csv')
     # save the model
     torch.save(model.state_dict(), "dino_model_adamW.pth")
 
